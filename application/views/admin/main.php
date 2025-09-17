@@ -9,7 +9,7 @@
     <meta name="description" content="">
     <meta name="author" content="">
 
-    <title>Admin Obscu - <?= $title ?></title>
+    <title>Portal Admin CSL - <?= $title ?></title>
     <!-- Custom fonts for this template-->
     <link href="<?= base_url('vendor/sbadmin2/vendor/fontawesome-free/css/all.min.css') ?>" rel="stylesheet"
         type="text/css">

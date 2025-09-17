@@ -52,4 +52,9 @@ defined('BASEPATH') or exit('No direct script access allowed');
 $route['default_controller'] = 'index';
 $route['404_override'] = '';
 $route['translate_uri_dashes'] = FALSE;
+$route['admin/data-karyawan'] = 'admin/data_karyawan';
+$route['admin/data-karyawan/(:num)'] = 'admin/data_karyawan/$1';
+$route['admin/data-absensi'] = 'admin/data_absensi';
+$route['admin/data-jabatan'] = 'admin/data_jabatan';
+$route['admin/data-jabatan/(:num)'] = 'admin/data_jabatan/$1';
 

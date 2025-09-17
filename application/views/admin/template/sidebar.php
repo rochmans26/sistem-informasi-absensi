@@ -1,12 +1,11 @@
 <ul class="navbar-nav bg-gradient-primary sidebar sidebar-dark accordion" id="accordionSidebar">
 
     <!-- Sidebar - Brand -->
-    <a class="sidebar-brand d-flex align-items-center justify-content-center"
-        href="<?php echo site_url('admin/dashboard'); ?>">
+    <a class="sidebar-brand d-flex align-items-center justify-content-center" href="<?php echo site_url('admin'); ?>">
         <div class="sidebar-brand-icon rotate-n-15">
-            <i class="fas fa-weight"></i>
+            <i class="fas fa-user-shield"></i>
         </div>
-        <div class="sidebar-brand-text mx-3">Prediksi Obesitas</div>
+        <div class="sidebar-brand-text mx-3">Portal Admin CSL</div>
     </a>
     <!-- <a class="sidebar-brand d-flex align-items-center justify-content-center" href="index.html">
         <div class="sidebar-brand-icon rotate-n-15">
@@ -20,7 +19,7 @@
 
     <!-- Nav Item - Dashboard -->
     <li class="nav-item active">
-        <a class="nav-link" href="<?= site_url('admin/dashboard') ?>">
+        <a class="nav-link" href="<?= site_url('admin') ?>">
             <i class="fas fa-fw fa-tachometer-alt"></i>
             <span>Dashboard</span></a>
     </li>
@@ -33,37 +32,30 @@
         Fitur
     </div>
     <li class="nav-item">
-        <a class="nav-link" href="<?php echo site_url('admin/predict'); ?>">
-            <i class="fas fa-fw fa-calculator"></i>
-            <span>Prediksi</span>
+        <a class="nav-link" href="<?php echo site_url('admin/data-karyawan'); ?>">
+            <i class="fas fa-fw fa-users"></i>
+            <span>Kelola Data Karyawan</span>
         </a>
     </li>
     <!-- Nav Item - Metrics -->
     <li class="nav-item">
-        <a class="nav-link" href="<?php echo site_url('admin/metrics'); ?>">
-            <i class="fas fa-fw fa-chart-bar"></i>
-            <span>Metrik Model</span>
+        <a class="nav-link" href="<?php echo site_url('admin/data-absensi'); ?>">
+            <i class="fas fa-fw fa-list"></i>
+            <span>Kelola Data Absensi</span>
+        </a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link" href="<?php echo site_url('admin/data-jabatan'); ?>">
+            <i class="fas fa-fw fa-list"></i>
+            <span>Kelola Data Jabatan</span>
         </a>
     </li>
 
-    <!-- Nav Item - Data Management -->
-    <li class="nav-item">
-        <a class="nav-link" href="<?php echo site_url('admin/manage_dataset'); ?>">
-            <i class="fas fa-fw fa-database"></i>
-            <span>Manajemen Data</span>
-        </a>
-    </li>
     <!-- Nav Item - Data User Management -->
     <li class="nav-item">
-        <a class="nav-link" href="<?php echo site_url('admin/manage_users'); ?>">
+        <a class="nav-link" href="<?php echo site_url(''); ?>">
             <i class="fas fa-fw fa-user"></i>
-            <span>Data Pengguna</span>
-        </a>
-    </li>
-    <li class="nav-item">
-        <a class="nav-link" href="<?php echo site_url('admin/riwayat-checkup'); ?>">
-            <i class="fas fa-fw fa-wrench"></i>
-            <span>Riwayat CheckUp</span>
+            <span>Data Admin</span>
         </a>
     </li>
 
