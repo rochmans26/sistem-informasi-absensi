@@ -185,8 +185,8 @@
                                 <option value="SMP">SMP</option>
                                 <option value="SMA">SMA</option>
                                 <option value="SMK">SMK</option>
-                                <option value="S1">S1</option>
-                                <option value="S2">S2</option>
+                                <option value="S-1">S1</option>
+                                <option value="S-2">S2</option>
                             </select>
                             <div class="invalid-feedback" id="error-pendidikan_terakhir">Pendidikan terakhir wajib
                                 dipilih</div>

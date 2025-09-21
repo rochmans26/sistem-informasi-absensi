@@ -13,9 +13,9 @@ class SendEmail extends CI_Model
     {
         $config = [
             'protocol' => 'smtp',
-            'smtp_host' => 'your_host',
-            'smtp_user' => 'yourmail@gmail.com',
-            'smtp_pass' => 'xxxx xxxx xxxx xxxx',
+            'smtp_host' => 'smtp.gmail.com',
+            'smtp_user' => 'shylouproject.official@gmail.com',
+            'smtp_pass' => 'fijw tkrt otrr mgnw',
             'smtp_port' => 587,
             'smtp_crypto' => 'tls',
             'mailtype' => 'html',
@@ -32,7 +32,7 @@ class SendEmail extends CI_Model
         $this->email->initialize($this->configureEmail());
 
         // Set pengirim, penerima, dan isi email
-        $this->email->from('yourmail@gmail.com', 'Your-App');
+        $this->email->from('shylouproject.official@gmail.com', 'Crepes Susu Lembang Factory');
         $this->email->to($receipt);
         $this->email->subject($subject);
         $this->email->message($message);
@@ -129,6 +129,9 @@ class SendEmail extends CI_Model
             case 3: // Type reporting
                 $this->type_reporting();
                 break;
+            case 5: // Type reporting
+                $this->type_sendpw($email, $name, $data);
+                break;
             case 4: // Type reporting
                 $this->type_history_checkup($email, $name, $data);
                 break;
@@ -137,6 +140,31 @@ class SendEmail extends CI_Model
                 show_404(); // Jika type tidak dikenal
                 break;
         }
+    }
+
+    private function type_sendpw($email, $name, $data)
+    {
+        $confMessage = '
+        <div class="email-container" style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
+            <div class="email-header" style="background: #f4f4f4; padding: 20px; text-align: center;">
+                <h1 style="color: #555;">Halo, ' . htmlspecialchars($name) . '!</h1>
+            </div>
+            <div class="email-body" style="padding: 20px;">
+                <p>Terima kasih telah bergabung dengan kami. Kami sangat senang bisa menyambut Anda di perusahaan kami.</p>
+                <p>Berikut Kode Karyawan Anda:</p>
+                <p style="text-align: center;">
+                    <a href="#" style="display: inline-block; padding: 10px 20px; background: #28a745; color: #fff; text-decoration: none; border-radius: 5px;">' . htmlspecialchars($data['kode']) . '</a>
+                </p>
+                <p>Silahkan hubungi Technical Support, jika butuh bantuan!</p>
+                <p>Salam hangat,</p>
+                <p><strong>Crepes Semprong Susu Lembang Factory</strong></p>
+            </div>
+            <div class="email-footer" style="background: #f4f4f4; padding: 10px; text-align: center;">
+                <p>&copy; 2025 Crepes Semprong Susu Lembang Factory. All rights reserved.</p>
+            </div>
+        </div>';
+        $message = $this->templateMessage($confMessage);
+        return $this->sendMessage('Crepes Semprong Susu Lembang Factory | no-reply', $message, $email);
     }
 
     // Method untuk konfirmasi

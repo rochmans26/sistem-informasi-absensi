@@ -29,7 +29,7 @@ class Index extends CI_Controller
     }
     public function index()
     {
-        $data['karyawan'] = $this->Karyawan_model->get_all();
+        $data['karyawan'] = $this->Karyawan_model->getKaryawan();
         $this->load->view('index', $data);
     }
     public function proses()

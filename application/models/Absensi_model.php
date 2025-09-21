@@ -12,7 +12,7 @@ class Absensi_model extends CI_Model
     public function verify_password($id_karyawan, $kode_karyawan)
     {
         $karyawan = $this->db->get_where('tb_karyawan', ['id' => $id_karyawan])->row();
-        if ($karyawan->kode_karyawan == $kode_karyawan) {
+        if (password_verify($kode_karyawan, $karyawan->kode_karyawan)) {
             // jika password disimpan dalam bentuk hash
             return true;
         }
@@ -41,10 +41,12 @@ class Absensi_model extends CI_Model
 
     public function absen_keluar($id_absensi, $foto)
     {
+        $current_time = $this->get_database_time();
         $this->db->where('id', $id_absensi);
         $this->db->update('tb_absensi', [
-            'jam_keluar' => date('H:i:s'),
-            'foto_keluar' => $foto
+            'jam_keluar' => $current_time->time,
+            'foto_keluar' => $foto,
+            'status' => 'hadir'
         ]);
     }
 

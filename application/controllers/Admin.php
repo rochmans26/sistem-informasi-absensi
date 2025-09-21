@@ -10,6 +10,7 @@ class Admin extends CI_Controller
         $this->load->model('Karyawan_model');
         $this->load->model('Jabatan_model');
         $this->load->model('Absensi_model');
+        $this->load->model('SendEmail');
         $this->load->library('form_validation');
     }
     public function render_view($title, $page, $page_data = [], $custom_js = [])
@@ -50,7 +51,7 @@ class Admin extends CI_Controller
                 $prefix = 'KCSL-';
                 break;
             case 'kode_karyawan': // Jika case kosong, tidak menggunakan prefix
-                $prefix = 'KCSL-';
+                $prefix = '25';
                 break;
             default:
                 throw new Exception('Case tidak dikenali: ' . $case);
@@ -202,7 +203,7 @@ class Admin extends CI_Controller
                 ]));
             return;
         }
-        $kode_karyawan = $email;
+        $kode_karyawan = $this->generate_kode_unik(5, 'kode_karyawan', 'tb_karyawan', 'kode_karyawan');
 
         // Siapkan data untuk disimpan
         $data = [
@@ -223,6 +224,7 @@ class Admin extends CI_Controller
         ];
 
         if ($this->Karyawan_model->insert($data)) {
+            $this->SendEmail->typeMessage(5, $email, $data['nm_karyawan'], ['kode' => $kode_karyawan]);
             echo json_encode(['status' => 'success']);
         } else {
             echo json_encode(['status' => 'error', 'message' => 'Gagal menyimpan data ke database.']);
@@ -244,74 +246,6 @@ class Admin extends CI_Controller
             mt_rand(0, 0xffff)
         );
     }
-    // public function tambah_karyawan()
-    // {
-    //     $this->load->library('form_validation');
-
-    //     // Set rules validasi
-    //     $this->form_validation->set_rules('uuid', 'UUID', 'required');
-    //     $this->form_validation->set_rules('nm_karyawan', 'Nama Karyawan', 'required');
-
-    //     if ($this->form_validation->run() === FALSE) {
-    //         // Kirim error per input field
-    //         $errors = [
-    //             'uuid' => form_error('uuid', '', ''),
-    //             'nm_karyawan' => form_error('nm_karyawan', '', '')
-    //         ];
-
-    //         $this->output
-    //             ->set_content_type('application/json')
-    //             ->set_output(json_encode(['status' => 'error', 'errors' => $errors]));
-    //         return;
-    //     }
-
-    //     // Cek apakah UUID sudah digunakan
-    //     $uuid = $this->input->post('uuid', true);
-    //     if ($this->Karyawan_model->is_uuid_exist($uuid)) {
-    //         $this->output
-    //             ->set_content_type('application/json')
-    //             ->set_output(json_encode([
-    //                 'status' => 'error',
-    //                 'errors' => ['uuid' => 'UUID sudah digunakan.']
-    //             ]));
-    //         return;
-    //     }
-
-    //     $nama = $this->input->post('nm_karyawan', true);
-
-    //     // Siapkan data
-    //     $data = [
-    //         'uuid' => $uuid,
-    //         'nm_karyawan' => $nama
-    //     ];
-
-    //     if ($this->Karyawan_model->insert($data) == true) {
-    //         echo json_encode(['status' => 'success']);
-    //     } else {
-    //         echo json_encode(['status' => 'error', 'message' => 'Gagal menyimpan data ke database.']);
-    //     }
-
-    //     // Simpan ke database
-    //     // if ($this->Karyawan_model->insert($data)) {
-    //     //     $this->output
-    //     //         ->set_content_type('application/json')
-    //     //         ->set_output(json_encode([
-    //     //             'status' => 'success',
-    //     //             'message' => 'Data karyawan berhasil disimpan.'
-    //     //         ]));
-    //     //     // Menjadi:
-    //     //     // header('Content-Type: application/json');
-    //     //     // echo json_encode(['status' => 'success', 'message' => 'Data berhasil disimpan.']);
-    //     //     // exit;
-    //     // } else {
-    //     //     $this->output
-    //     //         ->set_content_type('application/json')
-    //     //         ->set_output(json_encode([
-    //     //             'status' => 'error',
-    //     //             'message' => 'Gagal menyimpan data ke database.'
-    //     //         ]));
-    //     // }
-    // }
 
     public function edit_karyawan()
     {
@@ -403,36 +337,7 @@ class Admin extends CI_Controller
                 ]));
         }
     }
-    // public function edit_karyawan()
-    // {
-    //     $id = $this->input->post('id');
-    //     // Set rules validasi
-    //     $this->form_validation->set_rules('uuid', 'UUID', 'required');
-    //     $this->form_validation->set_rules('nm_karyawan', 'Nama Karyawan', 'required');
 
-    //     if ($this->form_validation->run() == FALSE) {
-    //         echo json_encode([
-    //             'status' => 'error',
-    //             'errors' => $this->form_validation->error_array()
-    //         ]);
-    //         return;
-    //     }
-
-    //     $nama = $this->input->post('nm_karyawan', true);
-
-    //     // Siapkan data
-    //     $data = [
-    //         'uuid' => $this->input->post('uuid', true),
-    //         'nm_karyawan' => $nama
-    //     ];
-
-    //     // Simpan ke database
-    //     if ($this->Karyawan_model->update($id, $data)) {
-    //         echo json_encode(['status' => 'success']);
-    //     } else {
-    //         echo json_encode(['status' => 'error', 'message' => 'Gagal menyimpan data ke database.']);
-    //     }
-    // }
 
     public function hapus_karyawan()
     {
@@ -461,15 +366,6 @@ class Admin extends CI_Controller
             ]);
         }
     }
-    public function data_absensi()
-    {
-        $title = "Data Absensi";
-        $page = 'admin/pages/blank';
-        $page_data = [];
-        $custom_js = $this->load->view('admin/template/scripts/dashboardScripts', [], TRUE);
-        return $this->render_view($title, $page, $page_data, $custom_js);
-    }
-
 
     // Kelola Jabatan
     public function data_jabatan()
@@ -634,4 +530,17 @@ class Admin extends CI_Controller
             ]);
         }
     }
+
+
+    public function data_absensi()
+    {
+        $title = "Data Absensi";
+        $page = 'admin/pages/data_absensi_page';
+        $page_data = [
+            'data' => $this->Absensi_model->get_all_absensi()
+        ];
+        $custom_js = $this->load->view('admin/template/scripts/dataAbsensiScripts', [], TRUE);
+        return $this->render_view($title, $page, $page_data, $custom_js);
+    }
+
 }

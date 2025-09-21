@@ -19,6 +19,11 @@ class Karyawan_model extends CI_Model
             ->get('tb_karyawan')
             ->result();
     }
+
+    public function getKaryawan()
+    {
+        return $this->db->get('tb_karyawan')->result();
+    }
     public function get_data_karyawan($id)
     {
         $this->db->where('id', $id);
