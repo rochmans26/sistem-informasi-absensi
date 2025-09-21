@@ -62,4 +62,15 @@ class Karyawan_model extends CI_Model
             return false;
         }
     }
+    public function is_email_exist($email)
+    {
+        $this->db->where('email', $email);
+        $query = $this->db->get('tb_karyawan');
+
+        if ($query->num_rows() > 0) {
+            return true;
+        } else {
+            return false;
+        }
+    }
 }

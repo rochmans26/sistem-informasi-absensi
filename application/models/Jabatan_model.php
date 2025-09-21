@@ -19,6 +19,11 @@ class Jabatan_model extends CI_Model
             ->get('tb_jabatan')
             ->result();
     }
+
+    public function get_jabatan()
+    {
+        return $this->db->get('tb_jabatan')->result();
+    }
     public function get_data_jabatan($id)
     {
         $this->db->where('id', $id);

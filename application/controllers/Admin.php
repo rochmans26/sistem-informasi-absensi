@@ -49,8 +49,8 @@ class Admin extends CI_Controller
             case 'uuid':
                 $prefix = 'KCSL-';
                 break;
-            case '': // Jika case kosong, tidak menggunakan prefix
-                $prefix = '';
+            case 'kode_karyawan': // Jika case kosong, tidak menggunakan prefix
+                $prefix = 'KCSL-';
                 break;
             default:
                 throw new Exception('Case tidak dikenali: ' . $case);
@@ -121,7 +121,8 @@ class Admin extends CI_Controller
         $page = 'admin/pages/data_karyawan_page';
         $page_data = [
             'data' => $this->Karyawan_model->get_all($config['per_page'], $start),
-            'pagination' => $this->pagination->create_links()
+            'pagination' => $this->pagination->create_links(),
+            'jabatan' => $this->Jabatan_model->get_jabatan()
         ];
         $custom_js = $this->load->view('admin/template/scripts/dataKaryawanScripts', [], TRUE);
         return $this->render_view($title, $page, $page_data, $custom_js);
@@ -132,30 +133,67 @@ class Admin extends CI_Controller
         // $custom_js = $this->load->view('admin/template/scripts/dataKaryawanScripts', [], TRUE);
         // return $this->render_view($title, $page, $page_data, $custom_js);
     }
+
+
     public function tambah_karyawan()
     {
+        log_message('debug', 'Data POST: ' . print_r($this->input->post(), true));
         $this->load->library('form_validation');
 
-        // Set rules validasi
-        $this->form_validation->set_rules('uuid', 'UUID', 'required');
+        // Set rules validasi untuk semua field
         $this->form_validation->set_rules('nm_karyawan', 'Nama Karyawan', 'required');
+        $this->form_validation->set_rules('email', 'Email', 'required|valid_email');
+        $this->form_validation->set_rules('alamat_ktp', 'Alamat KTP', 'required');
+        $this->form_validation->set_rules('alamat_domisili', 'Alamat Domisili', 'required');
+        $this->form_validation->set_rules('tempat_lahir', 'Tempat Lahir', 'required');
+        $this->form_validation->set_rules('tanggal_lahir', 'Tanggal Lahir', 'required');
+        $this->form_validation->set_rules('jenis_kelamin', 'Jenis Kelamin', 'required|in_list[L,P]');
+        $this->form_validation->set_rules('kewarganegaraan', 'Kewarganegaraan', 'required|in_list[WNI,WNA]');
+        $this->form_validation->set_rules('agama', 'Agama', 'required');
+        $this->form_validation->set_rules('pendidikan_terakhir', 'Pendidikan Terakhir', 'required');
+        $this->form_validation->set_rules('id_jabatan', 'id_jabatan', 'required');
+        $this->form_validation->set_rules('telp', 'telp', 'required');
 
         if ($this->form_validation->run() === FALSE) {
             // Kirim error per input field
             $errors = [
-                'uuid' => form_error('uuid', '', ''),
-                'nm_karyawan' => form_error('nm_karyawan', '', '')
+                'nm_karyawan' => form_error('nm_karyawan', '', ''),
+                'email' => form_error('email', '', ''),
+                'alamat_ktp' => form_error('alamat_ktp', '', ''),
+                'alamat_domisili' => form_error('alamat_domisili', '', ''),
+                'tempat_lahir' => form_error('tempat_lahir', '', ''),
+                'tanggal_lahir' => form_error('tanggal_lahir', '', ''),
+                'jenis_kelamin' => form_error('jenis_kelamin', '', ''),
+                'kewarganegaraan' => form_error('kewarganegaraan', '', ''),
+                'agama' => form_error('agama', '', ''),
+                'pendidikan_terakhir' => form_error('pendidikan_terakhir', '', ''),
+                'id_jabatan' => form_error('id_jabatan', '', ''),
+                'telp' => form_error('telp', '', '')
             ];
-
+            log_message('debug', 'Validation Errors: ' . print_r($errors, true));
             $this->output
                 ->set_content_type('application/json')
                 ->set_output(json_encode(['status' => 'error', 'errors' => $errors]));
             return;
         }
 
-        // Cek apakah UUID sudah digunakan
+        // Cek apakah email sudah digunakan
+        $email = $this->input->post('email', true);
+        if ($this->Karyawan_model->is_email_exist($email)) {
+            $this->output
+                ->set_content_type('application/json')
+                ->set_output(json_encode([
+                    'status' => 'error',
+                    'errors' => ['email' => 'Email sudah digunakan.']
+                ]));
+            return;
+        }
+
+        // Generate UUID jika tidak disediakan
         $uuid = $this->input->post('uuid', true);
-        if ($this->Karyawan_model->is_uuid_exist($uuid)) {
+        if (empty($uuid)) {
+            $uuid = $this->generate_uuid();
+        } else if ($this->Karyawan_model->is_uuid_exist($uuid)) {
             $this->output
                 ->set_content_type('application/json')
                 ->set_output(json_encode([
@@ -164,42 +202,116 @@ class Admin extends CI_Controller
                 ]));
             return;
         }
+        $kode_karyawan = $email;
 
-        $nama = $this->input->post('nm_karyawan', true);
-
-        // Siapkan data
+        // Siapkan data untuk disimpan
         $data = [
             'uuid' => $uuid,
-            'nm_karyawan' => $nama
+            'nm_karyawan' => $this->input->post('nm_karyawan', true),
+            'email' => $email,
+            'kode_karyawan' => password_hash($kode_karyawan, PASSWORD_DEFAULT),
+            'alamat_ktp' => $this->input->post('alamat_ktp', true),
+            'alamat_domisili' => $this->input->post('alamat_domisili', true),
+            'tempat_lahir' => $this->input->post('tempat_lahir', true),
+            'tanggal_lahir' => $this->input->post('tanggal_lahir', true),
+            'jenis_kelamin' => $this->input->post('jenis_kelamin', true),
+            'kewarganegaraan' => $this->input->post('kewarganegaraan', true),
+            'agama' => $this->input->post('agama', true),
+            'pendidikan_terakhir' => $this->input->post('pendidikan_terakhir', true),
+            'id_jabatan' => $this->input->post('id_jabatan', true),
+            'telp' => $this->input->post('telp', true),
         ];
 
-        if ($this->Karyawan_model->insert($data) == true) {
+        if ($this->Karyawan_model->insert($data)) {
             echo json_encode(['status' => 'success']);
         } else {
             echo json_encode(['status' => 'error', 'message' => 'Gagal menyimpan data ke database.']);
         }
-
-        // Simpan ke database
-        // if ($this->Karyawan_model->insert($data)) {
-        //     $this->output
-        //         ->set_content_type('application/json')
-        //         ->set_output(json_encode([
-        //             'status' => 'success',
-        //             'message' => 'Data karyawan berhasil disimpan.'
-        //         ]));
-        //     // Menjadi:
-        //     // header('Content-Type: application/json');
-        //     // echo json_encode(['status' => 'success', 'message' => 'Data berhasil disimpan.']);
-        //     // exit;
-        // } else {
-        //     $this->output
-        //         ->set_content_type('application/json')
-        //         ->set_output(json_encode([
-        //             'status' => 'error',
-        //             'message' => 'Gagal menyimpan data ke database.'
-        //         ]));
-        // }
     }
+
+    // Fungsi untuk generate UUID
+    private function generate_uuid()
+    {
+        return sprintf(
+            '%04x%04x-%04x-%04x-%04x-%04x%04x%04x',
+            mt_rand(0, 0xffff),
+            mt_rand(0, 0xffff),
+            mt_rand(0, 0xffff),
+            mt_rand(0, 0x0fff) | 0x4000,
+            mt_rand(0, 0x3fff) | 0x8000,
+            mt_rand(0, 0xffff),
+            mt_rand(0, 0xffff),
+            mt_rand(0, 0xffff)
+        );
+    }
+    // public function tambah_karyawan()
+    // {
+    //     $this->load->library('form_validation');
+
+    //     // Set rules validasi
+    //     $this->form_validation->set_rules('uuid', 'UUID', 'required');
+    //     $this->form_validation->set_rules('nm_karyawan', 'Nama Karyawan', 'required');
+
+    //     if ($this->form_validation->run() === FALSE) {
+    //         // Kirim error per input field
+    //         $errors = [
+    //             'uuid' => form_error('uuid', '', ''),
+    //             'nm_karyawan' => form_error('nm_karyawan', '', '')
+    //         ];
+
+    //         $this->output
+    //             ->set_content_type('application/json')
+    //             ->set_output(json_encode(['status' => 'error', 'errors' => $errors]));
+    //         return;
+    //     }
+
+    //     // Cek apakah UUID sudah digunakan
+    //     $uuid = $this->input->post('uuid', true);
+    //     if ($this->Karyawan_model->is_uuid_exist($uuid)) {
+    //         $this->output
+    //             ->set_content_type('application/json')
+    //             ->set_output(json_encode([
+    //                 'status' => 'error',
+    //                 'errors' => ['uuid' => 'UUID sudah digunakan.']
+    //             ]));
+    //         return;
+    //     }
+
+    //     $nama = $this->input->post('nm_karyawan', true);
+
+    //     // Siapkan data
+    //     $data = [
+    //         'uuid' => $uuid,
+    //         'nm_karyawan' => $nama
+    //     ];
+
+    //     if ($this->Karyawan_model->insert($data) == true) {
+    //         echo json_encode(['status' => 'success']);
+    //     } else {
+    //         echo json_encode(['status' => 'error', 'message' => 'Gagal menyimpan data ke database.']);
+    //     }
+
+    //     // Simpan ke database
+    //     // if ($this->Karyawan_model->insert($data)) {
+    //     //     $this->output
+    //     //         ->set_content_type('application/json')
+    //     //         ->set_output(json_encode([
+    //     //             'status' => 'success',
+    //     //             'message' => 'Data karyawan berhasil disimpan.'
+    //     //         ]));
+    //     //     // Menjadi:
+    //     //     // header('Content-Type: application/json');
+    //     //     // echo json_encode(['status' => 'success', 'message' => 'Data berhasil disimpan.']);
+    //     //     // exit;
+    //     // } else {
+    //     //     $this->output
+    //     //         ->set_content_type('application/json')
+    //     //         ->set_output(json_encode([
+    //     //             'status' => 'error',
+    //     //             'message' => 'Gagal menyimpan data ke database.'
+    //     //         ]));
+    //     // }
+    // }
 
     public function edit_karyawan()
     {
@@ -210,27 +322,69 @@ class Admin extends CI_Controller
         $this->load->library('form_validation');
         $this->form_validation->set_rules('id', 'ID', 'required');
         $this->form_validation->set_rules('uuid', 'UUID', 'required');
-        $this->form_validation->set_rules('nm_karyawan', 'Nama Karyawan', 'required');
+        $this->form_validation->set_rules('nm_karyawan', 'Nama Karyawan', 'required|max_length[100]');
+        $this->form_validation->set_rules('email', 'Email', 'required|valid_email|max_length[100]');
+        $this->form_validation->set_rules('alamat_ktp', 'Alamat KTP', 'required|max_length[255]');
+        $this->form_validation->set_rules('alamat_domisili', 'Alamat Domisili', 'required|max_length[255]');
+        $this->form_validation->set_rules('tempat_lahir', 'Tempat Lahir', 'required|max_length[50]');
+        $this->form_validation->set_rules('tanggal_lahir', 'Tanggal Lahir', 'required');
+        $this->form_validation->set_rules('jenis_kelamin', 'Jenis Kelamin', 'required|in_list[L,P]');
+        $this->form_validation->set_rules('kewarganegaraan', 'Kewarganegaraan', 'required|in_list[WNI,WNA]');
+        $this->form_validation->set_rules('agama', 'Agama', 'required|in_list[Islam,Kristen,Katolik,Hindu,Buddha,Konghucu]');
+        $this->form_validation->set_rules('pendidikan_terakhir', 'Pendidikan Terakhir', 'required|in_list[SD,SMP,SMA,SMK,S1,S2]');
+        $this->form_validation->set_rules('id_jabatan', 'Jabatan', 'required|numeric');
+        $this->form_validation->set_rules('telp', 'No. Telp', 'required|max_length[15]');
 
         if ($this->form_validation->run() === FALSE) {
-            $errors = [
-                'uuid' => form_error('uuid', '', ''),
-                'nm_karyawan' => form_error('nm_karyawan', '', '')
+            $errors = [];
+            $fields = [
+                'uuid',
+                'nm_karyawan',
+                'email',
+                'alamat_ktp',
+                'alamat_domisili',
+                'tempat_lahir',
+                'tanggal_lahir',
+                'jenis_kelamin',
+                'kewarganegaraan',
+                'agama',
+                'pendidikan_terakhir',
+                'id_jabatan',
+                'telp'
             ];
+
+            foreach ($fields as $field) {
+                if (form_error($field)) {
+                    $errors[$field] = form_error($field, '', '');
+                }
+            }
 
             $this->output
                 ->set_content_type('application/json')
-                ->set_output(json_encode(['status' => 'error', 'errors' => $errors]));
+                ->set_output(json_encode([
+                    'status' => 'error',
+                    'errors' => $errors,
+                    'message' => 'Validasi gagal'
+                ]));
             return;
         }
 
         $id = $this->input->post('id', true);
-        $uuid = $this->input->post('uuid', true);
-        $nama = $this->input->post('nm_karyawan', true);
 
         $data = [
-            'uuid' => $uuid,
-            'nm_karyawan' => $nama
+            'uuid' => $this->input->post('uuid', true),
+            'nm_karyawan' => $this->input->post('nm_karyawan', true),
+            'email' => $this->input->post('email', true),
+            'alamat_ktp' => $this->input->post('alamat_ktp', true),
+            'alamat_domisili' => $this->input->post('alamat_domisili', true),
+            'tempat_lahir' => $this->input->post('tempat_lahir', true),
+            'tanggal_lahir' => $this->input->post('tanggal_lahir', true),
+            'jenis_kelamin' => $this->input->post('jenis_kelamin', true),
+            'kewarganegaraan' => $this->input->post('kewarganegaraan', true),
+            'agama' => $this->input->post('agama', true),
+            'pendidikan_terakhir' => $this->input->post('pendidikan_terakhir', true),
+            'id_jabatan' => $this->input->post('id_jabatan', true),
+            'telp' => $this->input->post('telp', true)
         ];
 
         if ($this->Karyawan_model->update($id, $data)) {
