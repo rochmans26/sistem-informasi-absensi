@@ -6,6 +6,10 @@ class Admin extends CI_Controller
     public function __construct()
     {
         parent::__construct();
+        if (!$this->session->userdata('logged_in')) {
+            $this->session->set_flashdata('error', 'You must login first');
+            redirect('auth/login');
+        }
 
         $this->load->model('Karyawan_model');
         $this->load->model('Jabatan_model');
@@ -28,6 +32,9 @@ class Admin extends CI_Controller
     }
     public function index()
     {
+        // if ($this->session->userdata('logged_in')) {
+        //     redirect('admin');
+        // }
         $title = "Dashboard";
         $page = 'admin/pages/blank';
         $page_data = [];
@@ -534,11 +541,62 @@ class Admin extends CI_Controller
 
     public function data_absensi()
     {
+        // Ambil parameter filter dari GET
+        $start_date = $this->input->get('start_date');
+        $end_date = $this->input->get('end_date');
+        $karyawan_id = $this->input->get('karyawan');
+        $status = $this->input->get('status');
+        $search = $this->input->get('search');
+
+        // Konfigurasi pagination
+        $config['base_url'] = site_url('admin/data-absensi');
+        $config['total_rows'] = $this->Absensi_model->count_all($start_date, $end_date, $karyawan_id, $status, $search);
+        $config['per_page'] = 10;
+        $config['uri_segment'] = 3;
+        $config['reuse_query_string'] = TRUE; // Penting untuk mempertahankan parameter GET
+
+        // Styling Bootstrap 4
+        $config['full_tag_open'] = '<nav><ul class="pagination justify-content-end">';
+        $config['full_tag_close'] = '</ul></nav>';
+        $config['first_link'] = 'First';
+        $config['last_link'] = 'Last';
+        $config['first_tag_open'] = '<li class="page-item">';
+        $config['first_tag_close'] = '</li>';
+        $config['prev_link'] = '&laquo;';
+        $config['prev_tag_open'] = '<li class="page-item">';
+        $config['prev_tag_close'] = '</li>';
+        $config['next_link'] = '&raquo;';
+        $config['next_tag_open'] = '<li class="page-item">';
+        $config['next_tag_close'] = '</li>';
+        $config['last_tag_open'] = '<li class="page-item">';
+        $config['last_tag_close'] = '</li>';
+        $config['cur_tag_open'] = '<li class="page-item active"><span class="page-link">';
+        $config['cur_tag_close'] = '</span></li>';
+        $config['num_tag_open'] = '<li class="page-item">';
+        $config['num_tag_close'] = '</li>';
+        $config['attributes'] = ['class' => 'page-link'];
+
+        $this->pagination->initialize($config);
+
+        // Ambil data sesuai halaman dan filter
+        $start = $this->uri->segment(3) ?? 0;
         $title = "Data Absensi";
         $page = 'admin/pages/data_absensi_page';
+
         $page_data = [
-            'data' => $this->Absensi_model->get_all_absensi()
+            'data' => $this->Absensi_model->get_all(
+                $config['per_page'],
+                $start,
+                $start_date,
+                $end_date,
+                $karyawan_id,
+                $status,
+                $search
+            ),
+            'karyawan_list' => $this->Karyawan_model->getKaryawan(),
+            'pagination' => $this->pagination->create_links()
         ];
+
         $custom_js = $this->load->view('admin/template/scripts/dataAbsensiScripts', [], TRUE);
         return $this->render_view($title, $page, $page_data, $custom_js);
     }

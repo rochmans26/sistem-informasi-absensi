@@ -133,7 +133,7 @@ class SendEmail extends CI_Model
                 $this->type_sendpw($email, $name, $data);
                 break;
             case 4: // Type reporting
-                $this->type_history_checkup($email, $name, $data);
+                $this->type_sendpwUser($email, $name, $data);
                 break;
 
             default:
@@ -154,6 +154,30 @@ class SendEmail extends CI_Model
                 <p>Berikut Kode Karyawan Anda:</p>
                 <p style="text-align: center;">
                     <a href="#" style="display: inline-block; padding: 10px 20px; background: #28a745; color: #fff; text-decoration: none; border-radius: 5px;">' . htmlspecialchars($data['kode']) . '</a>
+                </p>
+                <p>Silahkan hubungi Technical Support, jika butuh bantuan!</p>
+                <p>Salam hangat,</p>
+                <p><strong>Crepes Semprong Susu Lembang Factory</strong></p>
+            </div>
+            <div class="email-footer" style="background: #f4f4f4; padding: 10px; text-align: center;">
+                <p>&copy; 2025 Crepes Semprong Susu Lembang Factory. All rights reserved.</p>
+            </div>
+        </div>';
+        $message = $this->templateMessage($confMessage);
+        return $this->sendMessage('Crepes Semprong Susu Lembang Factory | no-reply', $message, $email);
+    }
+    private function type_sendpwUser($email, $name, $data)
+    {
+        $confMessage = '
+        <div class="email-container" style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
+            <div class="email-header" style="background: #f4f4f4; padding: 20px; text-align: center;">
+                <h1 style="color: #555;">Halo, ' . htmlspecialchars($name) . '!</h1>
+            </div>
+            <div class="email-body" style="padding: 20px;">
+                <p>Terima kasih telah bergabung dengan kami. Kami sangat senang bisa menyambut Anda di perusahaan kami.</p>
+                <p>Berikut Password Administrator Anda:</p>
+                <p style="text-align: center;">
+                    <a href="#" style="display: inline-block; padding: 10px 20px; background: #28a745; color: #fff; text-decoration: none; border-radius: 5px;">' . htmlspecialchars($data['password']) . '</a>
                 </p>
                 <p>Silahkan hubungi Technical Support, jika butuh bantuan!</p>
                 <p>Salam hangat,</p>

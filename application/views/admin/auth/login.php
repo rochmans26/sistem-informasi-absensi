@@ -56,6 +56,7 @@
                                             placeholder="Password">
                                         <?php echo form_error('password', '<small class="text-danger">', '</small>'); ?>
                                     </div>
+                                    <!-- <input type="submit" class="btn btn-primary btn-user btn-block" value="Login"> -->
                                     <button type="submit" class="btn btn-primary btn-user btn-block">Login</button>
                                     <hr>
                                 </form>
