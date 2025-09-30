@@ -62,7 +62,8 @@ class Absensi_model extends CI_Model
 
     public function get_today_absensi()
     {
-        $today = date('Y-m-d');
+        $current_time = $this->get_database_time();
+        $today = $current_time->date;
         $this->db->select('tb_absensi.*, tb_karyawan.nm_karyawan, tb_karyawan.uuid');
         $this->db->from('tb_absensi');
         $this->db->join('tb_karyawan', 'tb_karyawan.id = tb_absensi.id_karyawan', 'left');
