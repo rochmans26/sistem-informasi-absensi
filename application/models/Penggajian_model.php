@@ -14,11 +14,27 @@ class Penggajian_model extends CI_Model
         ) as total_jam_lembur');
         $this->db->select('SUM(
             CASE 
-                WHEN TIME_TO_SEC(TIMEDIFF(a.jam_keluar, a.jam_masuk)) / 3600 < 10 
+                WHEN TIME_TO_SEC(TIMEDIFF(a.jam_keluar, a.jam_masuk)) / 3600 <= 5 
                 THEN 1 
                 ELSE 0 
             END
-        ) as total_hari_kurang');
+        ) as total_hari_kurang_50');
+        $this->db->select('SUM(
+            CASE 
+                WHEN TIME_TO_SEC(TIMEDIFF(a.jam_keluar, a.jam_masuk)) / 3600 > 5 
+                AND TIME_TO_SEC(TIMEDIFF(a.jam_keluar, a.jam_masuk)) / 3600 < 10 
+                THEN 1 
+                ELSE 0 
+            END
+        ) as total_hari_kurang_proporsional');
+        $this->db->select('SUM(
+            CASE 
+                WHEN TIME_TO_SEC(TIMEDIFF(a.jam_keluar, a.jam_masuk)) / 3600 > 5 
+                AND TIME_TO_SEC(TIMEDIFF(a.jam_keluar, a.jam_masuk)) / 3600 < 10 
+                THEN TIME_TO_SEC(TIMEDIFF(a.jam_keluar, a.jam_masuk)) / 3600 
+                ELSE 0 
+            END
+        ) as total_jam_kurang_proporsional');
         $this->db->from('tb_karyawan k');
         $this->db->join('tb_jabatan j', 'j.id = k.id_jabatan', 'left');
         $this->db->join('tb_absensi a', "a.id_karyawan = k.id AND a.tgl_absensi BETWEEN '$start_date' AND '$end_date' AND a.status = 'hadir'", 'left');
@@ -42,19 +58,33 @@ class Penggajian_model extends CI_Model
 
         $result = $this->db->get()->result();
 
-        // Hitung gaji untuk setiap karyawan
+        // Hitung gaji untuk setiap karyawan dengan algoritma baru
         foreach ($result as $row) {
             $row->total_jam_lembur = $row->total_jam_lembur ? round($row->total_jam_lembur, 2) : 0;
             $row->total_hari_kerja = $row->total_hari_kerja ?: 0;
-            $row->total_hari_kurang = $row->total_hari_kurang ?: 0;
-            $row->total_hari_penuh = $row->total_hari_kerja - $row->total_hari_kurang;
+            $row->total_hari_kurang_50 = $row->total_hari_kurang_50 ?: 0;
+            $row->total_hari_kurang_proporsional = $row->total_hari_kurang_proporsional ?: 0;
+            $row->total_jam_kurang_proporsional = $row->total_jam_kurang_proporsional ? round($row->total_jam_kurang_proporsional, 2) : 0;
+            $row->total_hari_penuh = $row->total_hari_kerja - $row->total_hari_kurang_50 - $row->total_hari_kurang_proporsional;
 
-            // Hitung gaji dengan potongan 50% untuk hari yang kurang dari 10 jam
+            // Hitung gaji dengan algoritma baru
             $gaji_hari_penuh = $row->total_hari_penuh * $row->gaji_per_hari;
-            $gaji_hari_kurang = $row->total_hari_kurang * ($row->gaji_per_hari * 0.5); // 50% dari gaji harian
-            $row->gaji_pokok = $gaji_hari_penuh + $gaji_hari_kurang;
+            $gaji_hari_kurang_50 = $row->total_hari_kurang_50 * ($row->gaji_per_hari * 0.5); // 50% dari gaji harian
+            $gaji_hari_kurang_proporsional = ($row->total_jam_kurang_proporsional / 10) * $row->gaji_per_hari; // Proporsional berdasarkan jam
+            $row->gaji_pokok = $gaji_hari_penuh + $gaji_hari_kurang_50 + $gaji_hari_kurang_proporsional;
             $row->uang_lembur = $row->total_jam_lembur * 5000;
             $row->total_gaji = $row->gaji_pokok + $row->uang_lembur;
+
+            // Simpan detail perhitungan
+            $row->detail_perhitungan = [
+                'hari_penuh' => $row->total_hari_penuh,
+                'hari_kurang_50' => $row->total_hari_kurang_50,
+                'hari_kurang_proporsional' => $row->total_hari_kurang_proporsional,
+                'jam_kurang_proporsional' => $row->total_jam_kurang_proporsional,
+                'gaji_hari_penuh' => $gaji_hari_penuh,
+                'gaji_hari_kurang_50' => $gaji_hari_kurang_50,
+                'gaji_hari_kurang_proporsional' => $gaji_hari_kurang_proporsional
+            ];
         }
 
         return $result;
@@ -76,11 +106,27 @@ class Penggajian_model extends CI_Model
                     ), 0) as total_jam_lembur,
                     COALESCE(SUM(
                         CASE 
-                            WHEN TIME_TO_SEC(TIMEDIFF(a.jam_keluar, a.jam_masuk)) / 3600 < 10 
+                            WHEN TIME_TO_SEC(TIMEDIFF(a.jam_keluar, a.jam_masuk)) / 3600 <= 5 
                             THEN 1 
                             ELSE 0 
                         END
-                    ), 0) as total_hari_kurang
+                    ), 0) as total_hari_kurang_50,
+                    COALESCE(SUM(
+                        CASE 
+                            WHEN TIME_TO_SEC(TIMEDIFF(a.jam_keluar, a.jam_masuk)) / 3600 > 5 
+                            AND TIME_TO_SEC(TIMEDIFF(a.jam_keluar, a.jam_masuk)) / 3600 < 10 
+                            THEN 1 
+                            ELSE 0 
+                        END
+                    ), 0) as total_hari_kurang_proporsional,
+                    COALESCE(SUM(
+                        CASE 
+                            WHEN TIME_TO_SEC(TIMEDIFF(a.jam_keluar, a.jam_masuk)) / 3600 > 5 
+                            AND TIME_TO_SEC(TIMEDIFF(a.jam_keluar, a.jam_masuk)) / 3600 < 10 
+                            THEN TIME_TO_SEC(TIMEDIFF(a.jam_keluar, a.jam_masuk)) / 3600 
+                            ELSE 0 
+                        END
+                    ), 0) as total_jam_kurang_proporsional
                 FROM tb_karyawan k
                 LEFT JOIN tb_jabatan j ON j.id = k.id_jabatan
                 LEFT JOIN tb_absensi a ON a.id_karyawan = k.id 
@@ -117,22 +163,26 @@ class Penggajian_model extends CI_Model
         // Hitung gaji untuk setiap karyawan dengan algoritma baru
         foreach ($result as $row) {
             $row->total_jam_lembur = round($row->total_jam_lembur, 2);
-            $row->total_hari_kurang = $row->total_hari_kurang ?: 0;
-            $row->total_hari_penuh = $row->total_hari_kerja - $row->total_hari_kurang;
+            $row->total_jam_kurang_proporsional = round($row->total_jam_kurang_proporsional, 2);
+            $row->total_hari_penuh = $row->total_hari_kerja - $row->total_hari_kurang_50 - $row->total_hari_kurang_proporsional;
 
-            // Hitung gaji dengan potongan 50% untuk hari yang kurang dari 10 jam
+            // Hitung gaji dengan algoritma baru
             $gaji_hari_penuh = $row->total_hari_penuh * $row->gaji_per_hari;
-            $gaji_hari_kurang = $row->total_hari_kurang * ($row->gaji_per_hari * 0.5); // 50% dari gaji harian
-            $row->gaji_pokok = $gaji_hari_penuh + $gaji_hari_kurang;
+            $gaji_hari_kurang_50 = $row->total_hari_kurang_50 * ($row->gaji_per_hari * 0.5); // 50% dari gaji harian
+            $gaji_hari_kurang_proporsional = ($row->total_jam_kurang_proporsional / 10) * $row->gaji_per_hari; // Proporsional berdasarkan jam
+            $row->gaji_pokok = $gaji_hari_penuh + $gaji_hari_kurang_50 + $gaji_hari_kurang_proporsional;
             $row->uang_lembur = $row->total_jam_lembur * 5000;
             $row->total_gaji = $row->gaji_pokok + $row->uang_lembur;
 
-            // Simpan detail perhitungan untuk ditampilkan
+            // Simpan detail perhitungan
             $row->detail_perhitungan = [
                 'hari_penuh' => $row->total_hari_penuh,
-                'hari_kurang' => $row->total_hari_kurang,
+                'hari_kurang_50' => $row->total_hari_kurang_50,
+                'hari_kurang_proporsional' => $row->total_hari_kurang_proporsional,
+                'jam_kurang_proporsional' => $row->total_jam_kurang_proporsional,
                 'gaji_hari_penuh' => $gaji_hari_penuh,
-                'gaji_hari_kurang' => $gaji_hari_kurang
+                'gaji_hari_kurang_50' => $gaji_hari_kurang_50,
+                'gaji_hari_kurang_proporsional' => $gaji_hari_kurang_proporsional
             ];
         }
 
@@ -168,8 +218,11 @@ class Penggajian_model extends CI_Model
                 ELSE 0 
             END as jam_lembur,
             CASE 
-                WHEN TIME_TO_SEC(TIMEDIFF(a.jam_keluar, a.jam_masuk)) / 3600 < 10 
-                THEN "kurang" 
+                WHEN TIME_TO_SEC(TIMEDIFF(a.jam_keluar, a.jam_masuk)) / 3600 <= 5 
+                THEN "kurang_50" 
+                WHEN TIME_TO_SEC(TIMEDIFF(a.jam_keluar, a.jam_masuk)) / 3600 > 5 
+                     AND TIME_TO_SEC(TIMEDIFF(a.jam_keluar, a.jam_masuk)) / 3600 < 10 
+                THEN "kurang_proporsional"
                 ELSE "penuh" 
             END as status_jam_kerja,
             TIME_TO_SEC(TIMEDIFF(a.jam_keluar, a.jam_masuk)) / 3600 as total_jam_kerja');
@@ -238,35 +291,44 @@ class Penggajian_model extends CI_Model
     {
         $total_hari_kerja = count($detail_absensi);
         $total_jam_lembur = 0;
-        $total_hari_kurang = 0;
+        $total_hari_kurang_50 = 0;
+        $total_hari_kurang_proporsional = 0;
+        $total_jam_kurang_proporsional = 0;
         $total_hari_penuh = 0;
 
         foreach ($detail_absensi as $absensi) {
             $total_jam_lembur += $absensi->jam_lembur;
 
-            // Hitung hari dengan jam kerja kurang dari 10 jam
-            if ($absensi->total_jam_kerja < 10) {
-                $total_hari_kurang++;
+            // Kategorikan berdasarkan jam kerja
+            if ($absensi->total_jam_kerja <= 5) {
+                $total_hari_kurang_50++;
+            } elseif ($absensi->total_jam_kerja > 5 && $absensi->total_jam_kerja < 10) {
+                $total_hari_kurang_proporsional++;
+                $total_jam_kurang_proporsional += $absensi->total_jam_kerja;
             } else {
                 $total_hari_penuh++;
             }
         }
 
-        // Hitung gaji dengan potongan 50% untuk hari yang kurang dari 10 jam
+        // Hitung gaji dengan algoritma baru
         $gaji_hari_penuh = $total_hari_penuh * $gaji_per_hari;
-        $gaji_hari_kurang = $total_hari_kurang * ($gaji_per_hari * 0.5);
-        $gaji_pokok = $gaji_hari_penuh + $gaji_hari_kurang;
+        $gaji_hari_kurang_50 = $total_hari_kurang_50 * ($gaji_per_hari * 0.5); // 50% dari gaji harian
+        $gaji_hari_kurang_proporsional = ($total_jam_kurang_proporsional / 10) * $gaji_per_hari; // Proporsional berdasarkan jam
+        $gaji_pokok = $gaji_hari_penuh + $gaji_hari_kurang_50 + $gaji_hari_kurang_proporsional;
         $uang_lembur = $total_jam_lembur * 5000;
         $total_gaji = $gaji_pokok + $uang_lembur;
 
         return [
             'total_hari_kerja' => $total_hari_kerja,
             'total_hari_penuh' => $total_hari_penuh,
-            'total_hari_kurang' => $total_hari_kurang,
+            'total_hari_kurang_50' => $total_hari_kurang_50,
+            'total_hari_kurang_proporsional' => $total_hari_kurang_proporsional,
+            'total_jam_kurang_proporsional' => round($total_jam_kurang_proporsional, 2),
             'total_jam_lembur' => round($total_jam_lembur, 2),
             'gaji_pokok' => $gaji_pokok,
             'gaji_hari_penuh' => $gaji_hari_penuh,
-            'gaji_hari_kurang' => $gaji_hari_kurang,
+            'gaji_hari_kurang_50' => $gaji_hari_kurang_50,
+            'gaji_hari_kurang_proporsional' => $gaji_hari_kurang_proporsional,
             'uang_lembur' => $uang_lembur,
             'total_gaji' => $total_gaji
         ];

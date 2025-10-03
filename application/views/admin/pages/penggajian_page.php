@@ -15,7 +15,7 @@ $pagination = isset($data['pagination']) ? $data['pagination'] : '';
         <div class="card">
             <div class="card-header">Filter Rekap Penggajian</div>
             <div class="card-body">
-                <form method="GET" action="<?= site_url('penggajian') ?>">
+                <form method="GET" action="<?= site_url('admin/penggajian') ?>">
                     <div class="row">
                         <div class="col-md-3">
                             <div class="form-group">
@@ -60,10 +60,11 @@ $pagination = isset($data['pagination']) ? $data['pagination'] : '';
                             <div class="alert alert-info">
                                 <small>
                                     <i class="fas fa-info-circle"></i> 
-                                    <strong>Ketentuan Penggajian:</strong><br>
-                                    - Jam kerja ≥ 10 jam: Gaji harian penuh<br>
-                                    - Jam kerja < 10 jam: Gaji harian dikurangi 50%<br>
-                                    - Jam kerja > 10 jam: Setiap jam kelebihan dibayar Rp 5.000/jam
+                                    <strong>Ketentuan Penggajian Baru:</strong><br>
+                                    - Jam kerja ≥ 10 jam: Gaji harian 100%<br>
+                                    - Jam kerja ≤ 5 jam: Gaji harian 50%<br>
+                                    - Jam kerja > 5 jam dan < 10 jam: Gaji proporsional (gaji/10 × total jam)<br>
+                                    - Jam kerja > 10 jam: Lembur Rp 5.000/jam
                                 </small>
                             </div>
                         </div>
@@ -74,7 +75,7 @@ $pagination = isset($data['pagination']) ? $data['pagination'] : '';
                                 <i class="fas fa-calculator"></i> Hitung Rekap Gaji
                             </button>
                             <?php if(!empty($data_rekap)): ?>
-                                <a href="<?= site_url('penggajian/cetak_rekap_all?start_date=' . $start_date . '&end_date=' . $end_date . '&karyawan=' . $id_karyawan . '&search=' . $search) ?>" 
+                                <a href="<?= site_url('admin/penggajian/cetak_rekap_all?start_date=' . $start_date . '&end_date=' . $end_date . '&karyawan=' . $id_karyawan . '&search=' . $search) ?>" 
                                    class="btn btn-success" target="_blank">
                                     <i class="fas fa-print"></i> Cetak Semua
                                 </a>
@@ -127,7 +128,8 @@ $pagination = isset($data['pagination']) ? $data['pagination'] : '';
                                     <th>Gaji/Hari</th>
                                     <th>Total Hari</th>
                                     <th>Hari Penuh</th>
-                                    <th>Hari Kurang</th>
+                                    <th>Hari ≤5 jam</th>
+                                    <th>Hari 6-9 jam</th>
                                     <th>Jam Lembur</th>
                                     <th>Gaji Pokok</th>
                                     <th>Uang Lembur</th>
@@ -152,7 +154,10 @@ $pagination = isset($data['pagination']) ? $data['pagination'] : '';
                                             <span class="badge badge-success"><?= $rekap->total_hari_penuh ?> hari</span>
                                         </td>
                                         <td>
-                                            <span class="badge badge-warning"><?= $rekap->total_hari_kurang ?> hari</span>
+                                            <span class="badge badge-danger"><?= $rekap->total_hari_kurang_50 ?> hari</span>
+                                        </td>
+                                        <td>
+                                            <span class="badge badge-warning"><?= $rekap->total_hari_kurang_proporsional ?> hari</span>
                                         </td>
                                         <td><?= $rekap->total_jam_lembur ?> jam</td>
                                         <td>Rp <?= number_format($rekap->gaji_pokok, 0, ',', '.') ?></td>
@@ -160,11 +165,11 @@ $pagination = isset($data['pagination']) ? $data['pagination'] : '';
                                         <td><strong>Rp <?= number_format($rekap->total_gaji, 0, ',', '.') ?></strong></td>
                                         <td>
                                             <div class="btn-group btn-group-sm">
-                                                <a href="<?= site_url('penggajian/detail_karyawan/' . $rekap->id_karyawan . '?start_date=' . $start_date . '&end_date=' . $end_date) ?>" 
+                                                <a href="<?= site_url('admin/penggajian/detail_karyawan/' . $rekap->id_karyawan . '?start_date=' . $start_date . '&end_date=' . $end_date) ?>" 
                                                    class="btn btn-info" title="Detail">
                                                     <i class="fas fa-eye"></i>
                                                 </a>
-                                                <a href="<?= site_url('penggajian/cetak_slip/' . $rekap->id_karyawan . '?start_date=' . $start_date . '&end_date=' . $end_date) ?>" 
+                                                <a href="<?= site_url('admin/penggajian/cetak_slip/' . $rekap->id_karyawan . '?start_date=' . $start_date . '&end_date=' . $end_date) ?>" 
                                                    class="btn btn-success" target="_blank" title="Cetak Slip">
                                                     <i class="fas fa-print"></i>
                                                 </a>
@@ -175,7 +180,7 @@ $pagination = isset($data['pagination']) ? $data['pagination'] : '';
                             </tbody>
                             <tfoot>
                                 <tr class="table-primary">
-                                    <td colspan="8" class="text-right"><strong>Total Keseluruhan:</strong></td>
+                                    <td colspan="9" class="text-right"><strong>Total Keseluruhan:</strong></td>
                                     <td><strong>Rp <?= number_format($total_keseluruhan['total_gaji_pokok'], 0, ',', '.') ?></strong></td>
                                     <td><strong>Rp <?= number_format($total_keseluruhan['total_uang_lembur'], 0, ',', '.') ?></strong></td>
                                     <td colspan="2"><strong>Rp <?= number_format($total_keseluruhan['total_keseluruhan'], 0, ',', '.') ?></strong></td>

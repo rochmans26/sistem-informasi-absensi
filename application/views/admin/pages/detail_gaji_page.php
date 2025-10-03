@@ -13,7 +13,7 @@ $rekap = isset($data['rekap']) ? $data['rekap'] : [];
             <div class="card">
                 <div class="card-header d-flex justify-content-between align-items-center">
                     <h5 class="mb-0">Detail Gaji - <?= $karyawan->nm_karyawan ?></h5>
-                    <a href="<?= site_url('penggajian?start_date=' . $start_date . '&end_date=' . $end_date) ?>"
+                    <a href="<?= site_url('admin/penggajian?start_date=' . $start_date . '&end_date=' . $end_date) ?>"
                         class="btn btn-secondary btn-sm">
                         <i class="fas fa-arrow-left"></i> Kembali
                     </a>
@@ -52,9 +52,14 @@ $rekap = isset($data['rekap']) ? $data['rekap'] : [];
                                     <td><span class="badge badge-success"><?= $rekap['total_hari_penuh'] ?> hari</span></td>
                                 </tr>
                                 <tr>
-                                    <th>Hari Kurang (<10 jam)</th>
-                                    <td><span class="badge badge-warning"><?= $rekap['total_hari_kurang'] ?> hari</span>
+                                    <th>Hari ≤5 jam</th>
+                                    <td><span class="badge badge-danger"><?= $rekap['total_hari_kurang_50'] ?> hari</span>
                                     </td>
+                                </tr>
+                                <tr>
+                                    <th>Hari 6-9 jam</th>
+                                    <td><span class="badge badge-warning"><?= $rekap['total_hari_kurang_proporsional'] ?>
+                                            hari</span></td>
                                 </tr>
                                 <tr>
                                     <th>Total Jam Lembur</th>
@@ -66,7 +71,7 @@ $rekap = isset($data['rekap']) ? $data['rekap'] : [];
 
                     <!-- Rincian Gaji -->
                     <div class="row mb-4">
-                        <div class="col-md-8 offset-md-2">
+                        <div class="col-md-10 offset-md-1">
                             <div class="card">
                                 <div class="card-header bg-primary text-white">
                                     <h6 class="mb-0">Rincian Gaji</h6>
@@ -75,21 +80,24 @@ $rekap = isset($data['rekap']) ? $data['rekap'] : [];
                                     <table class="table">
                                         <tr>
                                             <td>Gaji Hari Penuh (<?= $rekap['total_hari_penuh'] ?> hari × Rp
-                                                <?= number_format($karyawan->gaji_per_hari, 0, ',', '.') ?>)
-                                            </td>
+                                                <?= number_format($karyawan->gaji_per_hari, 0, ',', '.') ?>)</td>
                                             <td class="text-right">Rp
-                                                <?= number_format($rekap['gaji_hari_penuh'], 0, ',', '.') ?>
-                                            </td>
+                                                <?= number_format($rekap['gaji_hari_penuh'], 0, ',', '.') ?></td>
                                         </tr>
                                         <tr>
-                                            <td>Gaji Hari Kurang (<?= $rekap['total_hari_kurang'] ?> hari × 50% × Rp
-                                                <?= number_format($karyawan->gaji_per_hari, 0, ',', '.') ?>)
-                                            </td>
+                                            <td>Gaji Hari ≤5 jam (<?= $rekap['total_hari_kurang_50'] ?> hari × 50% × Rp
+                                                <?= number_format($karyawan->gaji_per_hari, 0, ',', '.') ?>)</td>
                                             <td class="text-right">Rp
-                                                <?= number_format($rekap['gaji_hari_kurang'], 0, ',', '.') ?>
-                                            </td>
+                                                <?= number_format($rekap['gaji_hari_kurang_50'], 0, ',', '.') ?></td>
                                         </tr>
                                         <tr>
+                                            <td>Gaji Hari 6-9 jam (<?= $rekap['total_jam_kurang_proporsional'] ?> jam × Rp
+                                                <?= number_format($karyawan->gaji_per_hari / 10, 0, ',', '.') ?>/jam)</td>
+                                            <td class="text-right">Rp
+                                                <?= number_format($rekap['gaji_hari_kurang_proporsional'], 0, ',', '.') ?>
+                                            </td>
+                                        </tr>
+                                        <tr class="table-secondary">
                                             <td><strong>Total Gaji Pokok</strong></td>
                                             <td class="text-right"><strong>Rp
                                                     <?= number_format($rekap['gaji_pokok'], 0, ',', '.') ?></strong></td>
@@ -97,11 +105,10 @@ $rekap = isset($data['rekap']) ? $data['rekap'] : [];
                                         <tr>
                                             <td>Uang Lembur (<?= $rekap['total_jam_lembur'] ?> jam × Rp 5.000)</td>
                                             <td class="text-right">Rp
-                                                <?= number_format($rekap['uang_lembur'], 0, ',', '.') ?>
-                                            </td>
+                                                <?= number_format($rekap['uang_lembur'], 0, ',', '.') ?></td>
                                         </tr>
                                         <tr class="table-success">
-                                            <td><strong>Total Gaji</strong></td>
+                                            <td><strong>Total Gaji Diterima</strong></td>
                                             <td class="text-right"><strong>Rp
                                                     <?= number_format($rekap['total_gaji'], 0, ',', '.') ?></strong></td>
                                         </tr>
@@ -138,8 +145,10 @@ $rekap = isset($data['rekap']) ? $data['rekap'] : [];
                                             <td>
                                                 <?php if ($absensi->status_jam_kerja == 'penuh'): ?>
                                                     <span class="badge badge-success">Penuh</span>
+                                                <?php elseif ($absensi->status_jam_kerja == 'kurang_50'): ?>
+                                                    <span class="badge badge-danger">≤5 jam</span>
                                                 <?php else: ?>
-                                                    <span class="badge badge-warning">Kurang</span>
+                                                    <span class="badge badge-warning">6-9 jam</span>
                                                 <?php endif; ?>
                                             </td>
                                             <td>
@@ -157,7 +166,7 @@ $rekap = isset($data['rekap']) ? $data['rekap'] : [];
                     </div>
 
                     <div class="text-center mt-3">
-                        <a href="<?= site_url('penggajian/cetak_slip/' . $karyawan->id . '?start_date=' . $start_date . '&end_date=' . $end_date) ?>"
+                        <a href="<?= site_url('admin/penggajian/cetak_slip/' . $karyawan->id . '?start_date=' . $start_date . '&end_date=' . $end_date) ?>"
                             class="btn btn-success" target="_blank">
                             <i class="fas fa-print"></i> Cetak Slip Gaji
                         </a>

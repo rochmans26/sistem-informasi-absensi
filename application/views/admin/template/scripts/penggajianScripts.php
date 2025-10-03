@@ -19,5 +19,17 @@
         $('#end_date').on('change', function () {
             $('#start_date').attr('max', $(this).val());
         });
+
+        // Info ketentuan baru
+        $('.alert-info').html(`
+        <small>
+            <i class="fas fa-info-circle"></i> 
+            <strong>Ketentuan Penggajian:</strong><br>
+            - Jam kerja ≥ 10 jam: Gaji harian 100%<br>
+            - Jam kerja ≤ 5 jam: Gaji harian 50%<br>
+            - Jam kerja > 5 jam dan < 10 jam: Gaji proporsional (gaji/10 × total jam)<br>
+            - Jam kerja > 10 jam: Lembur Rp 5.000/jam
+        </small>
+    `);
     });
 </script>

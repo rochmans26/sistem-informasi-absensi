@@ -103,7 +103,8 @@
                     <th>Gaji/Hari</th>
                     <th>Total Hari</th>
                     <th>Hari Penuh</th>
-                    <th>Hari Kurang</th>
+                    <th>Hari ≤5 jam</th>
+                    <th>Hari 6-9 jam</th>
                     <th>Jam Lembur</th>
                     <th>Gaji Pokok</th>
                     <th>Uang Lembur</th>
@@ -121,7 +122,8 @@
                             <td class="text-right">Rp <?= number_format($rekap->gaji_per_hari, 0, ',', '.') ?></td>
                             <td class="text-center"><?= $rekap->total_hari_kerja ?></td>
                             <td class="text-center"><?= $rekap->total_hari_penuh ?></td>
-                            <td class="text-center"><?= $rekap->total_hari_kurang ?></td>
+                            <td class="text-center"><?= $rekap->total_hari_kurang_50 ?></td>
+                            <td class="text-center"><?= $rekap->total_hari_kurang_proporsional ?></td>
                             <td class="text-center"><?= $rekap->total_jam_lembur ?></td>
                             <td class="text-right">Rp <?= number_format($rekap->gaji_pokok, 0, ',', '.') ?></td>
                             <td class="text-right">Rp <?= number_format($rekap->uang_lembur, 0, ',', '.') ?></td>
@@ -131,13 +133,13 @@
                     <?php endforeach; ?>
                 <?php else: ?>
                     <tr>
-                        <td colspan="11" class="text-center">Tidak ada data</td>
+                        <td colspan="12" class="text-center">Tidak ada data</td>
                     </tr>
                 <?php endif; ?>
             </tbody>
             <tfoot>
                 <tr class="total">
-                    <td colspan="8" class="text-right"><strong>TOTAL KESELURUHAN:</strong></td>
+                    <td colspan="9" class="text-right"><strong>TOTAL KESELURUHAN:</strong></td>
                     <td class="text-right"><strong>Rp
                             <?= number_format($total_keseluruhan['total_gaji_pokok'], 0, ',', '.') ?></strong></td>
                     <td class="text-right"><strong>Rp
@@ -152,27 +154,15 @@
         <div class="footer">
             <p><strong>Dicetak pada:</strong> <?= date('d F Y H:i:s') ?></p>
             <p><strong>Total Karyawan:</strong> <?= count($data_rekap) ?> orang</p>
+            <p><strong>Ketentuan:</strong> ≤5 jam (50%), 6-9 jam (proporsional), ≥10 jam (100%), lembur Rp 5.000/jam</p>
         </div>
 
         <!-- Tombol Print -->
         <div class="no-print" style="text-align: center; margin-top: 20px;">
-            <button onclick="window.print()"
-                style="padding: 10px 20px; background: #007bff; color: white; border: none; border-radius: 5px; cursor: pointer;">
-                Cetak Laporan
-            </button>
-            <button onclick="window.close()"
-                style="padding: 10px 20px; background: #6c757d; color: white; border: none; border-radius: 5px; cursor: pointer; margin-left: 10px;">
-                Tutup
-            </button>
+            <button onclick="window.print()">Cetak Laporan</button>
+            <button onclick="window.close()">Tutup</button>
         </div>
     </div>
-
-    <script>
-        // Auto print ketika halaman loaded (opsional)
-        // window.onload = function() {
-        //     window.print();
-        // };
-    </script>
 </body>
 
 </html>

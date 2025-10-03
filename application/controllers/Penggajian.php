@@ -102,7 +102,8 @@ class Penggajian extends CI_Controller
             'total_uang_lembur' => 0,
             'total_keseluruhan' => 0,
             'total_hari_penuh' => 0,
-            'total_hari_kurang' => 0
+            'total_hari_kurang_50' => 0,
+            'total_hari_kurang_proporsional' => 0
         ];
 
         if (!empty($data_rekap)) {
@@ -111,7 +112,8 @@ class Penggajian extends CI_Controller
                 $total['total_uang_lembur'] += $rekap->uang_lembur;
                 $total['total_keseluruhan'] += $rekap->total_gaji;
                 $total['total_hari_penuh'] += $rekap->total_hari_penuh;
-                $total['total_hari_kurang'] += $rekap->total_hari_kurang;
+                $total['total_hari_kurang_50'] += $rekap->total_hari_kurang_50;
+                $total['total_hari_kurang_proporsional'] += $rekap->total_hari_kurang_proporsional;
             }
         }
 

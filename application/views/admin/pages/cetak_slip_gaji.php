@@ -178,10 +178,14 @@
                 <td width="25%"><span class="badge badge-success"><?= $rekap['total_hari_penuh'] ?> hari</span></td>
             </tr>
             <tr>
-                <th>Hari Kurang (<10 jam)</th>
-                <td><span class="badge badge-warning"><?= $rekap['total_hari_kurang'] ?> hari</span></td>
+                <th>Hari ≤5 jam</th>
+                <td><span class="badge badge-danger"><?= $rekap['total_hari_kurang_50'] ?> hari</span></td>
+                <th>Hari 6-9 jam</th>
+                <td><span class="badge badge-warning"><?= $rekap['total_hari_kurang_proporsional'] ?> hari</span></td>
+            </tr>
+            <tr>
                 <th>Total Jam Lembur</th>
-                <td><?= $rekap['total_jam_lembur'] ?> jam</td>
+                <td colspan="3"><?= $rekap['total_jam_lembur'] ?> jam</td>
             </tr>
         </table>
 
@@ -194,15 +198,19 @@
             </tr>
             <tr>
                 <td>Gaji Hari Penuh (<?= $rekap['total_hari_penuh'] ?> hari × Rp
-                    <?= number_format($karyawan->gaji_per_hari, 0, ',', '.') ?>)
-                </td>
+                    <?= number_format($karyawan->gaji_per_hari, 0, ',', '.') ?>)</td>
                 <td class="text-right">Rp <?= number_format($rekap['gaji_hari_penuh'], 0, ',', '.') ?></td>
             </tr>
             <tr>
-                <td>Gaji Hari Kurang (<?= $rekap['total_hari_kurang'] ?> hari × 50% × Rp
-                    <?= number_format($karyawan->gaji_per_hari, 0, ',', '.') ?>)
+                <td>Gaji Hari ≤5 jam (<?= $rekap['total_hari_kurang_50'] ?> hari × 50% × Rp
+                    <?= number_format($karyawan->gaji_per_hari, 0, ',', '.') ?>)</td>
+                <td class="text-right">Rp <?= number_format($rekap['gaji_hari_kurang_50'], 0, ',', '.') ?></td>
+            </tr>
+            <tr>
+                <td>Gaji Hari 6-9 jam (<?= $rekap['total_jam_kurang_proporsional'] ?> jam × Rp
+                    <?= number_format($karyawan->gaji_per_hari / 10, 0, ',', '.') ?>/jam)</td>
+                <td class="text-right">Rp <?= number_format($rekap['gaji_hari_kurang_proporsional'], 0, ',', '.') ?>
                 </td>
-                <td class="text-right">Rp <?= number_format($rekap['gaji_hari_kurang'], 0, ',', '.') ?></td>
             </tr>
             <tr class="total">
                 <td>Total Gaji Pokok</td>
@@ -218,7 +226,7 @@
             </tr>
         </table>
 
-        <!-- Detail Absensi (Opsional - bisa dihide jika terlalu panjang) -->
+        <!-- Detail Absensi -->
         <div class="section-title">DETAIL ABSENSI</div>
         <table class="table">
             <thead>
@@ -243,8 +251,10 @@
                             <td>
                                 <?php if ($absensi->status_jam_kerja == 'penuh'): ?>
                                     <span class="badge badge-success">Penuh</span>
+                                <?php elseif ($absensi->status_jam_kerja == 'kurang_50'): ?>
+                                    <span class="badge badge-danger">≤5 jam</span>
                                 <?php else: ?>
-                                    <span class="badge badge-warning">Kurang</span>
+                                    <span class="badge badge-warning">6-9 jam</span>
                                 <?php endif; ?>
                             </td>
                         </tr>
@@ -260,10 +270,11 @@
         <!-- Footer dan Tanda Tangan -->
         <div class="footer">
             <div class="company-info">
-                <strong>Ketentuan:</strong><br>
+                <strong>Ketentuan Penggajian:</strong><br>
                 - Jam kerja ≥ 10 jam: Gaji harian 100%<br>
-                - Jam kerja < 10 jam: Gaji harian 50%<br>
-                    - Jam kerja > 10 jam: Lembur Rp 5.000/jam
+                - Jam kerja ≤ 5 jam: Gaji harian 50%<br>
+                - Jam kerja 6-9 jam: Gaji proporsional per jam<br>
+                - Jam kerja > 10 jam: Lembur Rp 5.000/jam
             </div>
 
             <div class="signature">
@@ -276,39 +287,16 @@
             <div class="clear"></div>
         </div>
 
-        <!-- Tombol Print (hanya tampil di browser) -->
+        <!-- Tombol Print -->
         <div class="no-print" style="text-align: center; margin-top: 20px;">
-            <button onclick="window.print()" class="btn btn-primary"
-                style="padding: 10px 20px; background: #007bff; color: white; border: none; border-radius: 5px; cursor: pointer;">
+            <button onclick="window.print()" class="btn btn-primary">
                 <i class="fas fa-print"></i> Cetak Slip
             </button>
-            <button onclick="window.close()" class="btn btn-secondary"
-                style="padding: 10px 20px; background: #6c757d; color: white; border: none; border-radius: 5px; cursor: pointer; margin-left: 10px;">
+            <button onclick="window.close()" class="btn btn-secondary">
                 <i class="fas fa-times"></i> Tutup
             </button>
         </div>
     </div>
-
-    <script>
-        // Auto print ketika halaman loaded (opsional)
-        // window.onload = function() {
-        //     window.print();
-        // };
-
-        // Style untuk tombol (jika tidak menggunakan CSS external)
-        const style = document.createElement('style');
-        style.textContent = `
-            .btn:hover {
-                opacity: 0.8;
-            }
-            @media print {
-                .no-print {
-                    display: none !important;
-                }
-            }
-        `;
-        document.head.appendChild(style);
-    </script>
 </body>
 
 </html>
