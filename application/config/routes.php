@@ -57,4 +57,6 @@ $route['admin/data-karyawan/(:num)'] = 'admin/data_karyawan/$1';
 $route['admin/data-absensi'] = 'admin/data_absensi';
 $route['admin/data-jabatan'] = 'admin/data_jabatan';
 $route['admin/data-jabatan/(:num)'] = 'admin/data_jabatan/$1';
+$route['admin/data-penggajian'] = 'admin/data_penggajian';
+$route['admin/data-penggajian/(:num)'] = 'admin/data_penggajian/$1';
 

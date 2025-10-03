@@ -50,6 +50,12 @@
             <span>Kelola Data Jabatan</span>
         </a>
     </li>
+    <li class="nav-item">
+        <a class="nav-link" href="<?php echo site_url('penggajian'); ?>">
+            <i class="fas fa-fw fa-list"></i>
+            <span>Kelola Penggajian</span>
+        </a>
+    </li>
 
     <!-- Nav Item - Data User Management -->
     <li class="nav-item">
