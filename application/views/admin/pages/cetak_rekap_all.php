@@ -104,7 +104,9 @@
                     <th>Total Hari</th>
                     <th>Hari Penuh</th>
                     <th>Hari ≤5 jam</th>
+                    <th>Jam ≤5 jam</th> <!-- KOLOM BARU -->
                     <th>Hari 6-9 jam</th>
+                    <th>Jam 6-9 jam</th> <!-- KOLOM BARU -->
                     <th>Jam Lembur</th>
                     <th>Gaji Pokok</th>
                     <th>Uang Lembur</th>
@@ -121,9 +123,21 @@
                             <td><?= $rekap->nama_jabatan ?></td>
                             <td class="text-right">Rp <?= number_format($rekap->gaji_per_hari, 0, ',', '.') ?></td>
                             <td class="text-center"><?= $rekap->total_hari_kerja ?></td>
-                            <td class="text-center"><?= $rekap->total_hari_penuh ?></td>
-                            <td class="text-center"><?= $rekap->total_hari_kurang_50 ?></td>
-                            <td class="text-center"><?= $rekap->total_hari_kurang_proporsional ?></td>
+                            <td class="text-center">
+                                <span class="badge badge-success"><?= $rekap->total_hari_penuh ?></span>
+                            </td>
+                            <td class="text-center">
+                                <span class="badge badge-danger"><?= $rekap->total_hari_kurang_50 ?></span>
+                            </td>
+                            <td class="text-center">
+                                <span class="badge badge-info"><?= $rekap->total_jam_kurang_50 ?></span>
+                            </td>
+                            <td class="text-center">
+                                <span class="badge badge-warning"><?= $rekap->total_hari_kurang_proporsional ?></span>
+                            </td>
+                            <td class="text-center">
+                                <span class="badge badge-info"><?= $rekap->total_jam_kurang_proporsional ?></span>
+                            </td>
                             <td class="text-center"><?= $rekap->total_jam_lembur ?></td>
                             <td class="text-right">Rp <?= number_format($rekap->gaji_pokok, 0, ',', '.') ?></td>
                             <td class="text-right">Rp <?= number_format($rekap->uang_lembur, 0, ',', '.') ?></td>
@@ -133,13 +147,13 @@
                     <?php endforeach; ?>
                 <?php else: ?>
                     <tr>
-                        <td colspan="12" class="text-center">Tidak ada data</td>
+                        <td colspan="14" class="text-center">Tidak ada data</td>
                     </tr>
                 <?php endif; ?>
             </tbody>
             <tfoot>
                 <tr class="total">
-                    <td colspan="9" class="text-right"><strong>TOTAL KESELURUHAN:</strong></td>
+                    <td colspan="11" class="text-right"><strong>TOTAL KESELURUHAN:</strong></td>
                     <td class="text-right"><strong>Rp
                             <?= number_format($total_keseluruhan['total_gaji_pokok'], 0, ',', '.') ?></strong></td>
                     <td class="text-right"><strong>Rp

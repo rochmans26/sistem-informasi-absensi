@@ -80,22 +80,28 @@ $rekap = isset($data['rekap']) ? $data['rekap'] : [];
                                     <table class="table">
                                         <tr>
                                             <td>Gaji Hari Penuh (<?= $rekap['total_hari_penuh'] ?> hari × Rp
-                                                <?= number_format($karyawan->gaji_per_hari, 0, ',', '.') ?>)</td>
+                                                <?= number_format($karyawan->gaji_per_hari, 0, ',', '.') ?>)
+                                            </td>
                                             <td class="text-right">Rp
-                                                <?= number_format($rekap['gaji_hari_penuh'], 0, ',', '.') ?></td>
+                                                <?= number_format($rekap['gaji_hari_penuh'], 0, ',', '.') ?>
+                                            </td>
                                         </tr>
                                         <tr>
-                                            <td>Gaji Hari ≤5 jam (<?= $rekap['total_hari_kurang_50'] ?> hari × 50% × Rp
-                                                <?= number_format($karyawan->gaji_per_hari, 0, ',', '.') ?>)</td>
+                                            <td>Gaji Hari ≤5 jam (<?= $rekap['total_jam_kurang_50'] ?> jam × Rp
+                                                <?= number_format($karyawan->gaji_per_hari / 10, 0, ',', '.') ?>/jam)
+                                            </td>
+                                            <!-- DIUBAH -->
                                             <td class="text-right">Rp
-                                                <?= number_format($rekap['gaji_hari_kurang_50'], 0, ',', '.') ?></td>
-                                        </tr>
+                                                <?= number_format($rekap['gaji_jam_kurang_50'], 0, ',', '.') ?>
+                                            </td>
                                         <tr>
                                             <td>Gaji Hari 6-9 jam (<?= $rekap['total_jam_kurang_proporsional'] ?> jam × Rp
-                                                <?= number_format($karyawan->gaji_per_hari / 10, 0, ',', '.') ?>/jam)</td>
-                                            <td class="text-right">Rp
-                                                <?= number_format($rekap['gaji_hari_kurang_proporsional'], 0, ',', '.') ?>
+                                                <?= number_format($karyawan->gaji_per_hari / 10, 0, ',', '.') ?>/jam)
                                             </td>
+                                            <td class="text-right">Rp
+                                                <?= number_format($rekap['gaji_jam_kurang_proporsional'], 0, ',', '.') ?>
+                                            </td>
+                                            <!-- DIUBAH -->
                                         </tr>
                                         <tr class="table-secondary">
                                             <td><strong>Total Gaji Pokok</strong></td>
@@ -105,7 +111,8 @@ $rekap = isset($data['rekap']) ? $data['rekap'] : [];
                                         <tr>
                                             <td>Uang Lembur (<?= $rekap['total_jam_lembur'] ?> jam × Rp 5.000)</td>
                                             <td class="text-right">Rp
-                                                <?= number_format($rekap['uang_lembur'], 0, ',', '.') ?></td>
+                                                <?= number_format($rekap['uang_lembur'], 0, ',', '.') ?>
+                                            </td>
                                         </tr>
                                         <tr class="table-success">
                                             <td><strong>Total Gaji Diterima</strong></td>

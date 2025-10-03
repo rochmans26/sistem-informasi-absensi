@@ -129,7 +129,9 @@ $pagination = isset($data['pagination']) ? $data['pagination'] : '';
                                     <th>Total Hari</th>
                                     <th>Hari Penuh</th>
                                     <th>Hari ≤5 jam</th>
+                                    <th>Jam ≤5 jam</th>
                                     <th>Hari 6-9 jam</th>
+                                    <th>Jam 6-9 jam</th>
                                     <th>Jam Lembur</th>
                                     <th>Gaji Pokok</th>
                                     <th>Uang Lembur</th>
@@ -156,9 +158,11 @@ $pagination = isset($data['pagination']) ? $data['pagination'] : '';
                                         <td>
                                             <span class="badge badge-danger"><?= $rekap->total_hari_kurang_50 ?> hari</span>
                                         </td>
+                                         <td><span class="badge badge-info"><?= $rekap->total_jam_kurang_50 ?> jam</span></td>
                                         <td>
                                             <span class="badge badge-warning"><?= $rekap->total_hari_kurang_proporsional ?> hari</span>
                                         </td>
+                                        <td><span class="badge badge-info"><?= $rekap->total_jam_kurang_proporsional ?> jam</span></td>
                                         <td><?= $rekap->total_jam_lembur ?> jam</td>
                                         <td>Rp <?= number_format($rekap->gaji_pokok, 0, ',', '.') ?></td>
                                         <td>Rp <?= number_format($rekap->uang_lembur, 0, ',', '.') ?></td>
