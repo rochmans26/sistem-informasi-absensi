@@ -15,7 +15,7 @@ $pagination = isset($data['pagination']) ? $data['pagination'] : '';
         <div class="card">
             <div class="card-header">Filter Rekap Penggajian</div>
             <div class="card-body">
-                <form method="GET" action="<?= site_url('admin/penggajian') ?>">
+                <form method="GET" action="<?= site_url('penggajian') ?>">
                     <div class="row">
                         <div class="col-md-3">
                             <div class="form-group">
@@ -75,7 +75,7 @@ $pagination = isset($data['pagination']) ? $data['pagination'] : '';
                                 <i class="fas fa-calculator"></i> Hitung Rekap Gaji
                             </button>
                             <?php if(!empty($data_rekap)): ?>
-                                <a href="<?= site_url('admin/penggajian/cetak_rekap_all?start_date=' . $start_date . '&end_date=' . $end_date . '&karyawan=' . $id_karyawan . '&search=' . $search) ?>" 
+                                <a href="<?= site_url('penggajian/cetak_rekap_all?start_date=' . $start_date . '&end_date=' . $end_date . '&karyawan=' . $id_karyawan . '&search=' . $search) ?>" 
                                    class="btn btn-success" target="_blank">
                                     <i class="fas fa-print"></i> Cetak Semua
                                 </a>
@@ -169,11 +169,11 @@ $pagination = isset($data['pagination']) ? $data['pagination'] : '';
                                         <td><strong>Rp <?= number_format($rekap->total_gaji, 0, ',', '.') ?></strong></td>
                                         <td>
                                             <div class="btn-group btn-group-sm">
-                                                <a href="<?= site_url('admin/penggajian/detail_karyawan/' . $rekap->id_karyawan . '?start_date=' . $start_date . '&end_date=' . $end_date) ?>" 
+                                                <a href="<?= site_url('penggajian/detail_karyawan/' . $rekap->id_karyawan . '?start_date=' . $start_date . '&end_date=' . $end_date) ?>" 
                                                    class="btn btn-info" title="Detail">
                                                     <i class="fas fa-eye"></i>
                                                 </a>
-                                                <a href="<?= site_url('admin/penggajian/cetak_slip/' . $rekap->id_karyawan . '?start_date=' . $start_date . '&end_date=' . $end_date) ?>" 
+                                                <a href="<?= site_url('penggajian/cetak_slip/' . $rekap->id_karyawan . '?start_date=' . $start_date . '&end_date=' . $end_date) ?>" 
                                                    class="btn btn-success" target="_blank" title="Cetak Slip">
                                                     <i class="fas fa-print"></i>
                                                 </a>

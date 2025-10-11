@@ -13,7 +13,7 @@ $rekap = isset($data['rekap']) ? $data['rekap'] : [];
             <div class="card">
                 <div class="card-header d-flex justify-content-between align-items-center">
                     <h5 class="mb-0">Detail Gaji - <?= $karyawan->nm_karyawan ?></h5>
-                    <a href="<?= site_url('admin/penggajian?start_date=' . $start_date . '&end_date=' . $end_date) ?>"
+                    <a href="<?= site_url('penggajian?start_date=' . $start_date . '&end_date=' . $end_date) ?>"
                         class="btn btn-secondary btn-sm">
                         <i class="fas fa-arrow-left"></i> Kembali
                     </a>
@@ -173,7 +173,7 @@ $rekap = isset($data['rekap']) ? $data['rekap'] : [];
                     </div>
 
                     <div class="text-center mt-3">
-                        <a href="<?= site_url('admin/penggajian/cetak_slip/' . $karyawan->id . '?start_date=' . $start_date . '&end_date=' . $end_date) ?>"
+                        <a href="<?= site_url('penggajian/cetak_slip/' . $karyawan->id . '?start_date=' . $start_date . '&end_date=' . $end_date) ?>"
                             class="btn btn-success" target="_blank">
                             <i class="fas fa-print"></i> Cetak Slip Gaji
                         </a>
